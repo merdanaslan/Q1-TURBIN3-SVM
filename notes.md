@@ -1,102 +1,155 @@
-Transaction Lifecycle
-High-Level Explanation
-Transaction Submission: A user sends a transaction using a wallet, specifying inputs (accounts, instructions, recent blockhash).
-Leader Selection & Block Building: The leader receives transactions, organizes them into a block, and executes them.
-Transaction Propagation: The block is propagated to validators using Turbine.
-Validation & Consensus: Validators execute transactions independently, verify correctness, and vote using Tower BFT.
-Finalization: Once a majority agrees, the block is finalized and recorded on-chain.
+# Transaction Lifecycle
 
-Low-Level Explanation (With Inputs & Outputs)
-User Interaction:
-Input: Signed transaction (sender, receiver, amount, instructions, recent blockhash).
-Output: Encoded transaction sent to RPC node.
-Leader Processing:
-Input: Pool of transactions.
-Output: Proposed block containing executed transactions.
-Block Propagation:
-Input: Block created by the leader.
-Output: Block transmitted via Turbine to validators.
-Validation & Voting:
-Input: Proposed block received by validators.
-Output: Validators vote using Tower BFT after re-executing transactions.
-Finalization:
-Input: Block reaching consensus.
-Output: Block permanently recorded on-chain.
+## High-Level Explanation
+1. **Transaction Submission**
+   - A user sends a transaction using a wallet
+   - Specifies inputs (accounts, instructions, recent blockhash)
+
+2. **Leader Selection & Block Building**
+   - The leader receives transactions
+   - Organizes them into a block
+   - Executes them
+
+3. **Transaction Propagation**
+   - The block is propagated to validators using Turbine
+
+4. **Validation & Consensus**
+   - Validators execute transactions independently
+   - Verify correctness
+   - Vote using Tower BFT
+
+5. **Finalization**
+   - Once a majority agrees
+   - The block is finalized and recorded on-chain
+
+## Low-Level Explanation (With Inputs & Outputs)
+### User Interaction:
+- Input: Signed transaction (sender, receiver, amount, instructions, recent blockhash)
+- Output: Encoded transaction sent to RPC node
+
+### Leader Processing:
+- Input: Pool of transactions
+- Output: Proposed block containing executed transactions
+
+### Block Propagation:
+- Input: Block created by the leader
+- Output: Block transmitted via Turbine to validators
+
+### Validation & Voting:
+- Input: Proposed block received by validators
+- Output: Validators vote using Tower BFT after re-executing transactions
+
+### Finalization:
+- Input: Block reaching consensus
+- Output: Block permanently recorded on-chain
 
 
 NOTES
+-----
 
 Introduction
+-----
+
 Solana is a high-performance blockchain optimized for speed, efficiency, and user experience.
 Achieves high throughput with low transaction fees.
 Uses integrated architecture for scalability.
 Composability ensures all applications can interact seamlessly.
-Transaction lifecycle: Users send transactions → Leader processes them → Validators confirm them. 
-- Users initiate transactions, all of which
-are sent to the current lead block
-producer (known as the leader). The
-leader compiles these transactions into
-a block, executing them and thereby
-updating the blockchain's state.
-- This block of transactions is then
-propagated throughout the network for
-other validators to execute and confirm.
-Governance changes follow Solana Improvement Documents (SIMDs).
-Scaling and Throughput: Solana processes up to 65,000 transactions per second (TPS), whereas Ethereum (pre-rollups) can only handle 15 TPS. With rollups, Ethereum can scale to 1,000–4,000 TPS, but Solana remains significantly faster.
-Scaling Challenges: The blockchain trilemma (decentralization, security, scalability) makes it difficult to achieve all three optimally. Solana prioritizes scalability and low latency but works to maintain decentralization.
-Future Scaling Solutions: SVM Rollups and ZK Compression are being explored to improve scalability further.
-ZK Compression: Helps scale Solana by reducing the amount of on-chain data storage required. Instead of storing full transaction history or state updates directly on-chain, zero-knowledge proofs (ZKPs) allow for compressed representations of large data sets, making validation faster and reducing storage bloat. This enhances Solana's ability to handle more transactions while maintaining security and decentralization.
-	
 
+Transaction lifecycle: Users send transactions → Leader processes them → Validators confirm them.
+- Users initiate transactions, all of which are sent to the current lead block producer (known as the leader). The leader compiles these transactions into a block, executing them and thereby updating the blockchain's state.
+- This block of transactions is then propagated throughout the network for other validators to execute and confirm.
+
+Governance changes follow Solana Improvement Documents (SIMDs).
+
+Scaling and Throughput: Solana processes up to 65,000 transactions per second (TPS), whereas Ethereum (pre-rollups) can only handle 15 TPS. With rollups, Ethereum can scale to 1,000–4,000 TPS, but Solana remains significantly faster.
+
+Scaling Challenges: The blockchain trilemma (decentralization, security, scalability) makes it difficult to achieve all three optimally. Solana prioritizes scalability and low latency but works to maintain decentralization.
+
+Future Scaling Solutions: SVM Rollups and ZK Compression are being explored to improve scalability further.
+
+ZK Compression: Helps scale Solana by reducing the amount of on-chain data storage required. Instead of storing full transaction history or state updates directly on-chain, zero-knowledge proofs (ZKPs) allow for compressed representations of large data sets, making validation faster and reducing storage bloat. This enhances Solana's ability to handle more transactions while maintaining security and decentralization.
 
 Users
-Public key = account identifier; Private key = access control.
-Transactions are atomic (all or nothing execution) and use Ed25519 for cryptography.
-Transactions consist of a header, account list, blockhash, and instructions.
+-----
+Account Basics:
+- Public key = account identifier
+- Private key = access control
+- Transactions are atomic (all or nothing execution) and use Ed25519 for cryptography
+- Transactions consist of a header, account list, blockhash, and instructions
+
 Transaction Message Components:
-Header: Specifies the number of required signatures, indicates which accounts need to sign, and contains a reference to the transaction's structure.
-Account Addresses: Lists all accounts that will be read from or written to during the transaction. Knowing this in advance enables optimizations that improve efficiency.
-Recent Blockhash: Prevents duplicate and stale transactions. A blockhash expires after 151 blocks (~60.4 seconds), ensuring timely transaction execution.
-Instructions: Represent specific operations (e.g., transfer, mint, burn, create account, close account). Each instruction includes the program to execute, the required accounts, and necessary data.
+- Header: Specifies the number of required signatures, indicates which accounts need to sign, and contains a reference to the transaction's structure
+- Account Addresses: Lists all accounts that will be read from or written to during the transaction. Knowing this in advance enables optimizations that improve efficiency
+- Recent Blockhash: Prevents duplicate and stale transactions. A blockhash expires after 151 blocks (~60.4 seconds), ensuring timely transaction execution
+- Instructions: Represent specific operations (e.g., transfer, mint, burn, create account, close account). Each instruction includes the program to execute, the required accounts, and necessary data
+
 Transaction Limits:
-Size: Transactions can be up to 1,232 bytes.
-Account References: Limited by transaction structure.
-Compute Units (CUs): Measure transaction complexity and execution cost.
-Fees: Base fee + Prioritization fee (burn mechanism applied to fees).
-Priority Fees: Calculated as compute unit price × compute unit limit and paid in addition to the base fee.
-Distribution: Only the leader receives a portion of the priority fees from transactions included in their block.
-Fee Burning: 50% of base fees are burned to manage SOL supply.
-Validator Rewards: Non-leader validators earn rewards through:
-Staking rewards: Earned based on the amount of SOL staked and voting performance.
-Voting rewards: Validators vote on finalized blocks, and successful votes accumulate credits, determining their share of staking rewards.
-Transaction fees: Validators do not receive priority fees, but they may benefit from base fees depending on future SIMD changes.
+- Size: Transactions can be up to 1,232 bytes
+- Account References: Limited by transaction structure
+- Compute Units (CUs): Measure transaction complexity and execution cost
+
+Fee Structure:
+- Fees: Base fee + Prioritization fee (burn mechanism applied to fees)
+- Priority Fees: Calculated as compute unit price × compute unit limit and paid in addition to the base fee
+- Distribution: Only the leader receives a portion of the priority fees from transactions included in their block
+- Fee Burning: 50% of base fees are burned to manage SOL supply
+
+Validator Rewards:
+Non-leader validators earn rewards through:
+- Staking rewards: Earned based on the amount of SOL staked and voting performance
+- Voting rewards: Validators vote on finalized blocks, and successful votes accumulate credits, determining their share of staking rewards
+- Transaction fees: Validators do not receive priority fees, but they may benefit from base fees depending on future SIMD changes
 
 
 Gulf Stream
-Gulf Stream is Solana's transaction forwarding protocol that eliminates the mempool by sending transactions directly to the leader before they are executed.
-It improves efficiency by allowing leaders to pre-fetch and organize transactions before their slot arrives, ensuring faster execution.
-After the leader builds the block, it is propagated to validators using Turbine.
-Validators verify and execute the transactions to ensure correctness.
-Validators vote on the block using Tower BFT; if a majority agrees, the block is confirmed and finalized.
-Solana has no mempool; transactions are sent directly to the leader.
-RPC nodes (4,000+) facilitate transaction processing.
-Stake-Weighted Quality of Service (SWQoS): Prioritizes transactions from staked validators.
-- Notably, 80% of a leader's capacity (2,000 connections) is reserved for SWQoS, while the remaining 20% (500 connections) is allocated for transaction messages from non-staked nodes.
-- Prioritization Mechanism: SWQoS ensures that transactions from validators with higher stakes are prioritized, which helps maintain network stability and incentivizes staking.
-- Impact on Network Performance: By prioritizing staked transactions, SWQoS helps reduce congestion and ensures that critical transactions are processed efficiently, enhancing overall network performance.
-- Incentive for Staking: This mechanism provides an additional incentive for users to stake their SOL, as it directly impacts the speed and reliability of their transaction processing.
-- Dynamic Allocation: The allocation of resources between staked and non-staked nodes can be adjusted based on network conditions to optimize performance and fairness.
-QUIC protocol is used to manage transaction message transmission efficiently.
-Tower BFT: Solana's consensus mechanism, an adaptation of PBFT, uses Proof of History (PoH) to reduce communication overhead. Validators vote on blocks and lock in their votes with an exponentially increasing delay, making it costly to switch forks, ensuring stability and finality.
-Fork Causes: Forks develop due to network latency, leader failures, or conflicting block proposals. Parallel processing does not directly cause forks but can contribute to inconsistencies if validators execute transactions differently. Solana mitigates this by requiring transactions to declare all accounts they modify beforehand, reducing conflicts and preventing unnecessary forks.
-Epoch Duration: Each epoch lasts ~2–3 days, consisting of ~432,000 slots, with each slot lasting ~400ms.
-Leader Schedule: Solana operates on a deterministic leader schedule, where validators take turns producing blocks based on their stake weight. Each leader is assigned 4 consecutive slots (~1.6s total) per rotation. The schedule is computed at the start of each epoch and remains fixed until the next epoch.
-After the leader builds the block, it is propagated to validators using Turbine.
-Validators verify and execute the transactions to ensure correctness.
-Validators vote on the block using Tower BFT; if a majority agrees, the block is confirmed and finalized.
+----------
+#### Core Functionality
+- Gulf Stream is Solana's transaction forwarding protocol that eliminates the mempool by sending transactions directly to the leader before they are executed
+- It improves efficiency by allowing leaders to pre-fetch and organize transactions before their slot arrives, ensuring faster execution
+- Solana has no mempool; transactions are sent directly to the leader
+- RPC nodes (4,000+) facilitate transaction processing
+
+#### Transaction Flow
+1. After the leader builds the block, it is propagated to validators using Turbine
+2. Validators verify and execute the transactions to ensure correctness
+3. Validators vote on the block using Tower BFT; if a majority agrees, the block is confirmed and finalized
+
+#### Stake-Weighted Quality of Service (SWQoS)
+- Prioritizes transactions from staked validators
+- Capacity allocation:
+  - 80% (2,000 connections) reserved for SWQoS
+  - 20% (500 connections) allocated for non-staked nodes
+- Benefits:
+  - Prioritization Mechanism: Ensures transactions from higher-staked validators get priority
+  - Network Performance: Reduces congestion and ensures efficient processing of critical transactions
+  - Staking Incentive: Improves transaction speed and reliability for staked users
+  - Dynamic Allocation: Resource allocation adjustable based on network conditions
+
+#### Technical Components
+- QUIC protocol manages transaction message transmission efficiently
+- Tower BFT: 
+  - Solana's consensus mechanism (adapted from PBFT)
+  - Uses Proof of History (PoH) to reduce communication overhead
+  - Validators lock votes with exponentially increasing delay
+  - Makes fork-switching costly, ensuring stability and finality
+
+#### Fork Management
+- Causes: Network latency, leader failures, or conflicting block proposals
+- Mitigation: Transactions must declare modifiable accounts beforehand
+- Impact: Reduces conflicts and prevents unnecessary forks
+- Parallel processing: Can contribute to inconsistencies but managed through account declaration
+
+#### Timing and Scheduling
+- Epoch Duration: ~2–3 days (432,000 slots, 400ms per slot)
+- Leader Schedule:
+  - Deterministic schedule based on stake weight
+  - 4 consecutive slots per leader (~1.6s total)
+  - Computed at epoch start, fixed until next epoch
 
 
 Block Building
+-----
+
 Continuous block building vs. traditional discrete block building.
 400ms slots, 4 slots per leader (1.6s per leader rotation).
 Transaction Processing Unit (TPU) handles execution.
@@ -135,6 +188,8 @@ Solana Virtual Machine (SVM) executes transactions using a modified rBPF runtime
 
 
 Proof of History
+-----
+
 - Concept: Proof of History (PoH) is a cryptographic clock that provides a timestamp for each transaction, ensuring a consistent order of events.
 - Functionality: PoH is not a consensus mechanism but a way to encode the passage of time and order of transactions.
 - Benefits: Reduces the need for extensive communication between nodes, allowing for faster consensus and block production.
@@ -142,6 +197,8 @@ Proof of History
 - Role in Solana: Ensures validators adhere to the leader schedule and prevents premature block production.
 
 Accounts Model
+-----
+
 - Structure: Solana uses an account-based model where everything is an account, including user accounts, data accounts, and program accounts.
 - Fields: Accounts have fields like owner, lamports (SOL balance), data, rent epoch, and executable flag.
 - Ownership: Only the program that owns an account can modify its data, enhancing security.
@@ -149,6 +206,8 @@ Accounts Model
 - Program Derived Addresses (PDAs): Special accounts used by programs to store state, ensuring only the owning program can modify them.
 
 Turbine
+-----
+
 Purpose: Turbine is Solana's block propagation protocol, inspired by BitTorrent, designed to efficiently distribute blocks across the network.
 Mechanism: Breaks blocks into smaller packets called "shreds" for transmission, using erasure coding to handle packet loss.
 - Forward Error Correction (FEC) Batches: Used to enhance data reliability by allowing the recovery of lost data packets.
@@ -166,6 +225,8 @@ Efficiency: Reduces the data load on the leader by distributing the transmission
 Structure: Validators are organized into a tree structure, with higher-stake validators closer to the root, optimizing data flow.
 
 Consensus
+-----
+
 - Mechanism: Solana uses Tower BFT, a variant of PBFT, leveraging PoH to reduce communication overhead.
 - Voting: Validators vote on blocks they consider valid, with votes incurring a transaction fee.
 - Forks: Occur due to network latency or leader failures; validators must choose a fork and stick with it for a lockout period.
@@ -192,11 +253,15 @@ Explanation of the TVU:
 - It operates in parallel with the TPU, focusing on validation and consensus rather than transaction execution.
 
 Economics & Jito
+-----
+
 - Inflation: Solana uses inflation to distribute staking rewards, with a decreasing rate over time.
 - Staking: SOL holders can delegate tokens to validators to earn rewards, with returns influenced by validator performance and commission rates.
 - Jito: A client that introduces blockspace auctions, providing additional incentives for validators through tips.
 
 Gossip & Archive
+-----
+
 - Gossip Network: Solana's control plane for disseminating metadata about the network state, using a peer-to-peer protocol.
 - Archive: Solana does not require full historical data for current state validation, relying on warehouse nodes for historical data storage.
 
