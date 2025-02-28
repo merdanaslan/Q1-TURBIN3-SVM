@@ -281,3 +281,52 @@ The Fetch Stage in the TPU involves fetching transactions and notifying relevant
 - `fee/src/lib.rs`
 - `runtime-transaction/src/lib.rs`
 - `cost-model/src/lib.rs`
+
+
+
+TPU:
+When a node is a leader, ingests transaction comming from quic, deduplicates, runs sigverify, packs and broadcasts shreds.
+
+TVU:
+When a node is not leader, recieves, recovers, repairs and retransmits shreds, inserts them into the blockstore,
+replays blocks, votes.
+
+Gossip:
+Runs all the time.
+
+
+
+Fetch Stage:
+
+- when we recieve transactions we need to accept them from the quic port 
+
+- 8 sec before a node becomes the leader the scheduler will start recieveing and buffering transactions
+(agave/core/src/banking_stage/transaction_scheduler/scheduler_controller.rs)
+
+-> before step above transactions are getting pushed to the scheduler from quic!
+
+- currently ingest about 100k transactions per second -> number of transactions that will be sent over the quic ports -> we can do 1 million tps on the ingest side (thats not what it pack because the blocks are small) 
+
+
+- this is what caused congestion before -> tokio-1.43.0/src/runtime/scheduler/multi_thread/worker.rs
+-> this the function that gets invoked when there is things to process, packets being processed by quinn
+
+
+
+
+paths:
+
+agave/quic-client/src/nonblocking/quic_client.rs
+agave/quic-client/src/lib.rs
+agave/quic-client/src/quic_client.rs
+
+
+
+
+agave/core/src/banking_stage/transaction_scheduler/scheduler_controller.rs
+agave/core/src/banking_stage/transaction_scheduler/receive_and_buffer.rs
+
+
+
+agave/streamer/src/nonblocking/quic.rs
+-> quic::handle_connection is called when a connection is streaming data
