@@ -322,11 +322,12 @@ agave/quic-client/src/quic_client.rs
 
 
 
-
 agave/core/src/banking_stage/transaction_scheduler/scheduler_controller.rs
 agave/core/src/banking_stage/transaction_scheduler/receive_and_buffer.rs
 
 
 
 agave/streamer/src/nonblocking/quic.rs
--> quic::handle_connection is called when a connection is streaming data
+(-> quic::handle_connection is called when a connection is streaming data e.g. RPC is sending transactions over TPU)
+
+
