@@ -1,4 +1,4 @@
-# New Fetch Documentation
+# Fetch Documentation
 
 This document outlines the relevant code across various modules that participate in the Fetch Stage of the TPU.
 
@@ -9,7 +9,7 @@ This document outlines the relevant code across various modules that participate
 - **Role**: Implements a nonblocking QUIC client that connects to UDP ports and provides an interface for sending data with flow control.
 - **Key Components**:
   - **Struct: `QuicLazyInitializedEndpoint`**
-    - A struct that lazily initializes QUIC endpoints for efficient connection management
+    - A struct that initializes QUIC endpoints for efficient connection management
   - **Key Functions**:
     ```rust
     pub fn new_with_client(client: Arc<QuicClient>, stats: Arc<ConnectionCacheStats>) -> Self {
